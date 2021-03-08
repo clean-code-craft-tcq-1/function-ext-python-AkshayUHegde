@@ -3,7 +3,7 @@ from Constant import BATTERY_PARAM_CHARACTERISTICS, PARAM_OPERATING_RANGE_CLASSI
 from math import ceil, floor
 
 
-def snap_limits_to_sensor_accuracy(battery_param_name, battery_param_operating_ranges):
+def snap_range_limits_to_sensor_accuracy(battery_param_name, battery_param_operating_ranges):
     battery_param_sensor_accuracy = BATTERY_PARAM_CHARACTERISTICS[battery_param_name]['sensor_accuracy']
     for operating_range in battery_param_operating_ranges.values():
         operating_range[0] = battery_param_sensor_accuracy * ceil(operating_range[0] /
@@ -13,7 +13,7 @@ def snap_limits_to_sensor_accuracy(battery_param_name, battery_param_operating_r
     return battery_param_operating_ranges
 
 
-def generate_operating_ranges(battery_param_name):
+def classify_operating_ranges(battery_param_name):
     param_operating_range = {}
     param_characteristics = BATTERY_PARAM_CHARACTERISTICS[battery_param_name]
     tolerance_correction = param_characteristics["tolerance"] * param_characteristics["sensor_limits"]["max"]

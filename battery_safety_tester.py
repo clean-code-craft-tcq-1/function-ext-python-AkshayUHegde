@@ -5,7 +5,7 @@ from Constant import BATTERY_PARAM_CHARACTERISTICS, \
     PARAM_NOK, \
     BATTERY_STATUS_CLASSIFIER
 from reporter import report_parameters
-from battery_param_range_handler import generate_operating_ranges, snap_limits_to_sensor_accuracy
+from battery_param_range_handler import classify_operating_ranges, snap_range_limits_to_sensor_accuracy
 
 
 def identify_battery_param_range_for_valid_param(battery_param_value, battery_param_operating_ranges):
@@ -19,8 +19,9 @@ def identify_battery_param_operating_range(battery_param_name, battery_param_val
         return PARAM_OPERATING_RANGE_CLASSIFIER[0]
     elif battery_param_name not in BATTERY_PARAM_CHARACTERISTICS:
         return PARAM_OPERATING_RANGE_CLASSIFIER[1]
-    battery_param_operating_ranges = generate_operating_ranges(battery_param_name)
-    battery_param_operating_ranges = snap_limits_to_sensor_accuracy(battery_param_name, battery_param_operating_ranges)
+    battery_param_operating_ranges = classify_operating_ranges(battery_param_name)
+    battery_param_operating_ranges = snap_range_limits_to_sensor_accuracy(battery_param_name,
+                                                                          battery_param_operating_ranges)
     return identify_battery_param_range_for_valid_param(battery_param_value, battery_param_operating_ranges)
 
 
