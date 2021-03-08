@@ -1,32 +1,48 @@
 from math import isnan
-from Constant import SUPPORTED_SAFETY_LIMIT_CHECKS
+from Constant import BATTERY_PARAM_CHARACTERISTICS, \
+    PARAM_OPERATING_RANGE_CLASSIFIER, \
+    PARAM_OK, \
+    PARAM_NOK, \
+    BATTERY_STATUS_CLASSIFIER
 from reporter import report_parameters
-from sensor_value_handler import snap_limits_to_sensor_accuracy
-
-def check_battery_param_limits(battery_param_name, battery_param_value):
-    if battery_param_value <= SUPPORTED_SAFETY_LIMIT_CHECKS[battery_param_name]['limits']['min']:
-        return 'ALERT_UNDERLIMIT'
-    elif battery_param_value >= SUPPORTED_SAFETY_LIMIT_CHECKS[battery_param_name]['limits']['max']:
-        return 'ALERT_OVERLIMIT'
-    return 'OK'
+from battery_param_range_handler import generate_operating_ranges, snap_limits_to_sensor_accuracy
 
 
-def check_battery_param_safety(battery_param_name, battery_param_value):
+def identify_battery_param_range_for_valid_param(battery_param_value, battery_param_operating_ranges):
+    for operating_range_classifier, operating_range in battery_param_operating_ranges.items():
+        if operating_range[0] <= battery_param_value < operating_range[1]:
+            return operating_range_classifier
+
+
+def identify_battery_param_operating_range(battery_param_name, battery_param_value):
     if isnan(battery_param_value):
-        return 'ALERT_VALUENAN'
-    elif battery_param_name not in SUPPORTED_SAFETY_LIMIT_CHECKS:
-        return 'ALERT_PARAMNAMEUNKNOWN'
-    return check_battery_param_limits(battery_param_name, battery_param_value)
+        return PARAM_OPERATING_RANGE_CLASSIFIER[0]
+    elif battery_param_name not in BATTERY_PARAM_CHARACTERISTICS:
+        return PARAM_OPERATING_RANGE_CLASSIFIER[1]
+    battery_param_operating_ranges = generate_operating_ranges(battery_param_name)
+    battery_param_operating_ranges = snap_limits_to_sensor_accuracy(battery_param_name, battery_param_operating_ranges)
+    return identify_battery_param_range_for_valid_param(battery_param_value, battery_param_operating_ranges)
 
 
-def check_overall_battery_safety(**all_battery_params):
-    snap_limits_to_sensor_accuracy(SUPPORTED_SAFETY_LIMIT_CHECKS)
-    all_battery_params_status = []
-    for battery_param_name in all_battery_params:
-        battery_param_status = check_battery_param_safety(battery_param_name, all_battery_params[battery_param_name])
-        battery_param_status = report_parameters(
+def is_param_ok_to_operate(battery_param_status):
+    alert_type = battery_param_status.split('_')[0]
+    if alert_type in PARAM_OK:
+        return True
+    elif alert_type in PARAM_NOK:
+        return False
+
+
+def is_battery_ok(**battery_params):
+    battery_params_ok = []
+    for battery_param_name in battery_params:
+        battery_param_operating_zone = identify_battery_param_operating_range(
             battery_param_name,
-            battery_param_status
-        )
-        all_battery_params_status.append(battery_param_status)
-    return ['INFO_BATTERYOK' if all(all_battery_params_status) else 'ALERT_BATTERYNOK'][0]
+            battery_params[battery_param_name])
+        print(report_parameters(
+            battery_param_name,
+            battery_param_operating_zone
+        ))
+        battery_param_ok = is_param_ok_to_operate(battery_param_operating_zone)
+        battery_params_ok.append(battery_param_ok)
+    print("*" * 100)
+    return [BATTERY_STATUS_CLASSIFIER[1] if all(battery_params_ok) else BATTERY_STATUS_CLASSIFIER[0]][0]

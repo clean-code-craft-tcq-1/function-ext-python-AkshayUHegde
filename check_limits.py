@@ -1,16 +1,46 @@
-from battery_safety_tester import check_battery_param_safety, check_overall_battery_safety
-from sensor_value_handler import snap_limits_to_sensor_accuracy
+import Constant
+import localization
+from battery_safety_tester import identify_battery_param_operating_range, is_battery_ok
+from reporter import report_overall_battery_status
 
 if __name__ == '__main__':
-    assert (check_overall_battery_safety(cell_temperature_in_celsius=25,
-                                         soc_in_percent=70.123456,
-                                         charge_rate_in_c_rate=0.7) is 'INFO_BATTERYOK')
-    assert (check_overall_battery_safety(cell_temperature_in_celsius=50,
-                                         soc_in_percent=85,
-                                         charge_rate_in_c_rate=0) is 'ALERT_BATTERYNOK')
-    assert (check_battery_param_safety("cell_temperature_in_celsius", float("nan")) == 'ALERT_VALUENAN')
-    assert (check_battery_param_safety("soh_in_percent", 50) == 'ALERT_PARAMNAMEUNKNOWN')
-    assert (check_battery_param_safety("cell_temperature_in_celsius", 55) == 'ALERT_OVERLIMIT')
-    assert (check_battery_param_safety("soc_in_percent", 15) == 'ALERT_UNDERLIMIT')
-    assert (snap_limits_to_sensor_accuracy({'test_value':{'limits': {'min': 0, 'max': 45},
-                                                          'sensor_accuracy': 2}})['test_value']['limits']['max'] == 44)
+    # Battery Parameter Safety Testing (incl. Warning Tests)
+    assert (identify_battery_param_operating_range("cell_temperature_in_celsius", float("nan")) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[0])
+    assert (identify_battery_param_operating_range("soh_in_percent", 50) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[1])
+    assert (identify_battery_param_operating_range("soc_in_percent", -50) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[2])
+    assert (identify_battery_param_operating_range("charge_rate_in_c_rate", 1.5) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[3])
+    assert (identify_battery_param_operating_range("soc_in_percent", 15) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[4])
+    assert (identify_battery_param_operating_range("cell_temperature_in_celsius", 55) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[5])
+    assert (identify_battery_param_operating_range("charge_rate_in_c_rate", 0.52) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[6])
+    assert (identify_battery_param_operating_range("cell_temperature_in_celsius", 44) ==
+            Constant.PARAM_OPERATING_RANGE_CLASSIFIER[7])
+
+    # Overall Battery Safety Testing (Warnings are considered OK)
+    assert (is_battery_ok(cell_temperature_in_celsius=25,
+                          soc_in_percent=73,
+                          charge_rate_in_c_rate=0.65) is Constant.BATTERY_STATUS_CLASSIFIER[1])
+    assert (is_battery_ok(cell_temperature_in_celsius=42,
+                          soc_in_percent=60,
+                          charge_rate_in_c_rate=0) is Constant.BATTERY_STATUS_CLASSIFIER[0])
+
+    # Localization Output Testing (For en-US and de-DE)
+    assert (report_overall_battery_status(is_battery_ok(cell_temperature_in_celsius=35,
+                                                                       soc_in_percent=60,
+                                                                       charge_rate_in_c_rate=0.85)) ==
+            localization.TRANSLATION_TABLE[Constant.LOCALIZATION_SUPPORT[0]]
+            ["overall_battery_report"]
+            [Constant.BATTERY_STATUS_CLASSIFIER[0]])
+    localization.set_localization(Constant.LOCALIZATION_SUPPORT[1])
+    assert (report_overall_battery_status(is_battery_ok(cell_temperature_in_celsius=35,
+                                                                       soc_in_percent=67,
+                                                                       charge_rate_in_c_rate=0.55)) ==
+            localization.TRANSLATION_TABLE[Constant.LOCALIZATION_SUPPORT[1]]
+            ["overall_battery_report"]
+            [Constant.BATTERY_STATUS_CLASSIFIER[1]])

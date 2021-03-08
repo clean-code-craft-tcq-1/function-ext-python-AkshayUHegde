@@ -30,11 +30,11 @@ We will explore the charging phase of Li-ion batteries to start with.
 ## Tasks
 
 1. Reduce the cyclomatic complexity.
-1. Avoid duplication - functions that do nearly the same thing
-1. Complete the tests - cover all conditions.
-1. To treat, we need to know the abnormal vital and the breach -
+2. Avoid duplication - functions that do nearly the same thing
+3. Complete the tests - cover all conditions.
+4. To treat, we need to know the abnormal vital and the breach -
 whether high or low. Add this capability.
-1. Add the ability to plug-in different reporters to this code.
+5. Add the ability to plug-in different reporters to this code.
 
 ## The Exploration
 
@@ -56,3 +56,8 @@ Shorten the Semantic distance
 - Functional to express relation between input and output
 - Object oriented to encapsulate state with actions
 - Apect oriented to capture repeating aspects
+
+## Selected Extensions for Extending and Refactoring Assignment
+
+- Early Warning
+- Support a language in addition to English
