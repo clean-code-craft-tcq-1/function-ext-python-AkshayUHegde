@@ -26,21 +26,6 @@ if __name__ == '__main__':
     assert (is_battery_ok(cell_temperature_in_celsius=25,
                           soc_in_percent=73,
                           charge_rate_in_c_rate=0.65) is Constant.BATTERY_STATUS_CLASSIFIER[1])
-    assert (is_battery_ok(cell_temperature_in_celsius=42,
+    assert (is_battery_ok(cell_temperature_in_celsius=95,
                           soc_in_percent=60,
                           charge_rate_in_c_rate=0) is Constant.BATTERY_STATUS_CLASSIFIER[0])
-
-    # Localization Output Testing (For en-US and de-DE)
-    assert (report_overall_battery_status(is_battery_ok(cell_temperature_in_celsius=35,
-                                                                       soc_in_percent=60,
-                                                                       charge_rate_in_c_rate=0.85)) ==
-            localization.TRANSLATION_TABLE[Constant.LOCALIZATION_SUPPORT[0]]
-            ["overall_battery_report"]
-            [Constant.BATTERY_STATUS_CLASSIFIER[0]])
-    localization.set_localization(Constant.LOCALIZATION_SUPPORT[1])
-    assert (report_overall_battery_status(is_battery_ok(cell_temperature_in_celsius=35,
-                                                                       soc_in_percent=67,
-                                                                       charge_rate_in_c_rate=0.55)) ==
-            localization.TRANSLATION_TABLE[Constant.LOCALIZATION_SUPPORT[1]]
-            ["overall_battery_report"]
-            [Constant.BATTERY_STATUS_CLASSIFIER[1]])

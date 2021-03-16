@@ -7,7 +7,8 @@ BATTERY_PARAM_CHARACTERISTICS = {
         'sensor_limits': {
             'min': -60,
             'max': 100
-        }
+        },
+        'console': True
     },
     'soc_in_percent': {
         'lower_safety_limit': 25,
@@ -17,7 +18,8 @@ BATTERY_PARAM_CHARACTERISTICS = {
         'sensor_limits': {
             'min': 0,
             'max': 100
-        }
+        },
+        'console': True
     },
     'charge_rate_in_c_rate': {
         'lower_safety_limit': 0.5,
@@ -27,7 +29,8 @@ BATTERY_PARAM_CHARACTERISTICS = {
         'sensor_limits': {
             'min': 0,
             'max': 1
-        }
+        },
+        'console': True
     }
 }
 # In descending order of severity
